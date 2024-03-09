@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $slide->path = htmlspecialchars(strip_tags($data->path));
     $slide->color = htmlspecialchars(strip_tags($data->color));
     $slide->img = htmlspecialchars(strip_tags($data->img));;
-    $slide->fileUpload = $data->fileUpload;
+    $slide->fileUpload = isset($_GET['fileUpload']) ? $_GET['fileUpload'] : null;
 
     if ($slide->create()) {
         echo json_encode(array(

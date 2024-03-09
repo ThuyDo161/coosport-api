@@ -1,60 +1,61 @@
 <?php
-class HeroSlide
+class Banner
 {
     private $conn;
 
-    // Category properties
-    public $slide_id;
+    // banner properties
+    public $id;
     public $title;
-    public $description;
     public $img;
-    public $color;
-    public $path;
+    public $is_active;
+    public $created_date;
+    public $updated_date;
     public $fileUpload;
 
     public function __construct($db)
     {
         $this->conn = $db;
+        $this->fileUpload = null;
     }
 
     public function read()
     {
-        $query = "SELECT * FROM `hero_slide`";
+        $query = "SELECT id, title, img, is_active, created_date, updated_date 
+        FROM banners";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
     }
 
+    // create data
     public function create()
     {
-        $query = "INSERT INTO hero_slide SET title=:title, description=:description, img=:img, color=:color, path=:path";
+        $query = "INSERT INTO banners SET title=:title, img=:img, is_active=:is_active";
         $stmt = $this->conn->prepare($query);
+
+        if (!$this->title || (!$this->img && !$this->fileUpload)) {
+            return false;
+        }
 
         // bind data 
         $stmt->bindParam(':title', $this->title);
-        $stmt->bindParam(':description', $this->description);
         $stmt->bindParam(':img', $this->img);
-        $stmt->bindParam(':path', $this->path);
-        $stmt->bindParam(':color', $this->color);
+        $stmt->bindParam(':is_active', $this->is_active);
 
         if ($this->fileUpload) {
             $img = $this->fileUpload;
-            $DIR = '../../Images/slider/';
+            $DIR = '../../Images/banner/';
             if (!is_dir($DIR)) {
                 mkdir($DIR, 0777, true);
             }
             $file_chunks = explode(";base64,", $img->file);
             $base64Img = base64_decode($file_chunks[1]);
 
-            $path = 'http://' . $_SERVER['HTTP_HOST'] . '/php/coosport-api/Images/slider/' . $img->name;
+            $path = 'http://' . $_SERVER['HTTP_HOST'] . '/php/coosport-api/Images/banner/' . $img->name;
             $file = $DIR . $img->name;
             if (file_put_contents($file, $base64Img)) {
                 $stmt->bindParam(':img', $path);
             };
-        }
-
-        if (!$this->title || !$this->description || (!$this->img && !$this->fileUpload) || !$this->path  || !$this->color) {
-            return false;
         }
 
         if ($stmt->execute()) {
@@ -67,35 +68,33 @@ class HeroSlide
     // update data
     public function update()
     {
-        $query = "UPDATE hero_slide SET title=:title, description=:description, img=:img, color=:color, path=:path WHERE slide_id=:slide_id";
+        $query = "UPDATE banners SET title=:title, img=:img, is_active=:is_active, updated_date = current_timestamp() WHERE id=:id";
         $stmt = $this->conn->prepare($query);
 
+        if (!$this->id || !$this->title || !$this->img) {
+            return false;
+        }
+
         // bind data 
-        $stmt->bindParam(':slide_id', $this->slide_id);
+        $stmt->bindParam(':id', $this->id);
         $stmt->bindParam(':title', $this->title);
-        $stmt->bindParam(':description', $this->description);
         $stmt->bindParam(':img', $this->img);
-        $stmt->bindParam(':path', $this->path);
-        $stmt->bindParam(':color', $this->color);
+        $stmt->bindParam(':is_active', $this->is_active);
 
         if ($this->fileUpload) {
             $img = $this->fileUpload;
-            $DIR = '../../Images/slider/';
+            $DIR = '../../Images/banner/';
             if (!is_dir($DIR)) {
                 mkdir($DIR, 0777, true);
             }
             $file_chunks = explode(";base64,", $img->file);
             $base64Img = base64_decode($file_chunks[1]);
 
-            $path = 'http://' . $_SERVER['HTTP_HOST'] . '/php/coosport-api/Images/slider/' . $img->name;
+            $path = 'http://' . $_SERVER['HTTP_HOST'] . '/php/coosport-api/Images/banner/' . $img->name;
             $file = $DIR . $img->name;
             if (file_put_contents($file, $base64Img)) {
                 $stmt->bindParam(':img', $path);
             };
-        }
-
-        if (!$this->slide_id || !$this->title || !$this->description || (!$this->img && !$this->fileUpload) || !$this->path  || !$this->color) {
-            return false;
         }
 
         if ($stmt->execute()) {
@@ -107,13 +106,13 @@ class HeroSlide
     // delete data
     public function delete()
     {
-        $query = "DELETE FROM hero_slide WHERE slide_id=:slide_id";
+        $query = "DELETE FROM banners WHERE id=:id";
         $stmt = $this->conn->prepare($query);
         // bind data 
-        if (!$this->slide_id) {
+        if (!$this->id) {
             return false;
         }
-        $stmt->bindParam(':slide_id', $this->slide_id);
+        $stmt->bindParam(':id', $this->id);
         if ($stmt->execute()) {
             return true;
         }

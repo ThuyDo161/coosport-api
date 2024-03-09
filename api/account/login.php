@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$row = $result->fetch(PDO::FETCH_ASSOC);
 		$jwt = new JwtHandler();
 		$token = $jwt->_jwt_encode_data(
-			'http://localhost:8080/php/htshop',
+			'http://localhost:8080/php/coosport-api',
 			array("user_id" => $row['username'])
 		);
 		$returnData = [
