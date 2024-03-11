@@ -31,8 +31,6 @@ class Product
     public $children_size;
 
     public $keySearch;
-    public $costFrom;
-    public $costTo;
     public $_limit;
     public $_page;
     public $_total_page;
@@ -72,17 +70,8 @@ class Product
     // Read data
     public function readAll()
     {
-        if ($this->costFrom && $this->costTo) {
-            $query = "SELECT product.product_id, `productname`, `pricesell`, `priceentry`, `count`, `description`, product.category_id, product.brand_id, `color`, `size`, `parent_id`, `product_slug`, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname, img.img AS 'img' 
-            FROM product LEFT JOIN img ON product.product_id = img.product_id 
-            LEFT JOIN category ON product.category_id = category.category_id
-            LEFT JOIN brand ON product.brand_id = brand.brand_id
-            LEFT JOIN color ON product.color = color.color_id
-            LEFT JOIN size ON product.size = size.size_id
-            WHERE parent_id is null 
-            and product.cost Between $this->costFrom and $this->costTo GROUP BY product.product_id  ORDER BY product.product_id";
-        } else {
-            $query = "SELECT product.product_id, product.productname, product.pricesell, product.priceentry, product.count, product.description, product.category_id, product.brand_id, product.color, product.size, product.parent_id, product.product_slug, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname,  GROUP_CONCAT(DISTINCT img.img) AS img, GROUP_CONCAT(DISTINCT p.color_code) as children_color, GROUP_CONCAT(DISTINCT p.sizename) AS
+
+        $query = "SELECT product.product_id, product.productname, product.pricesell, product.priceentry, product.count, product.description, product.category_id, product.brand_id, product.color, product.size, product.parent_id, product.product_slug, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname,  GROUP_CONCAT(DISTINCT img.img) AS img, GROUP_CONCAT(DISTINCT p.color_code) as children_color, GROUP_CONCAT(DISTINCT p.sizename) AS
             children_size
                         FROM product LEFT JOIN img ON product.product_id = img.product_id 
                         LEFT JOIN category ON product.category_id = category.category_id
@@ -91,23 +80,13 @@ class Product
                         LEFT JOIN size ON product.size = size.size_id
                         LEFT JOIN (SELECT product_id, parent_id, color_code, sizename FROM product, color, size WHERE product.color = color.color_id AND product.size = size.size_id ) p ON product.product_id = p.parent_id
                         GROUP BY product.product_id";
-        }
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         if ($this->_page && $this->_limit) {
             $start = $this->getStart($stmt->countRows());
-            if ($this->costFrom && $this->costTo) {
-                $query = "SELECT product.product_id, `productname`, `pricesell`, `priceentry`, `count`, `description`, product.category_id, product.brand_id, `color`, `size`, `parent_id`, `product_slug`, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname, img.img AS 'img' 
-                FROM product LEFT JOIN img ON product.product_id = img.product_id 
-                LEFT JOIN category ON product.category_id = category.category_id
-                LEFT JOIN brand ON product.brand_id = brand.brand_id
-                LEFT JOIN color ON product.color = color.color_id
-                LEFT JOIN size ON product.size = size.size_id
-                WHERE parent_id is null
-                and product.cost Between $this->costFrom and $this->costTo GROUP BY product.product_id 
-                ORDER BY product.product_id LIMIT $start,$this->_limit";
-            } else {
-                $query = "SELECT product.product_id, product.productname, product.pricesell, product.priceentry, product.count, product.description, product.category_id, product.brand_id, product.color, product.size, product.parent_id, product.product_slug, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname,  GROUP_CONCAT(DISTINCT img.img) AS img, GROUP_CONCAT(DISTINCT p.colorname) as children_color, GROUP_CONCAT(DISTINCT p.sizename) AS
+
+            $query = "SELECT product.product_id, product.productname, product.pricesell, product.priceentry, product.count, product.description, product.category_id, product.brand_id, product.color, product.size, product.parent_id, product.product_slug, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname,  GROUP_CONCAT(DISTINCT img.img) AS img, GROUP_CONCAT(DISTINCT p.colorname) as children_color, GROUP_CONCAT(DISTINCT p.sizename) AS
                 children_size
                             FROM product LEFT JOIN img ON product.product_id = img.product_id 
                             LEFT JOIN category ON product.category_id = category.category_id
@@ -117,7 +96,7 @@ class Product
                             LEFT JOIN (SELECT product_id, parent_id, colorname, sizename FROM product, color, size WHERE product.color = color.color_id AND product.size = size.size_id ) p ON product.product_id = p.parent_id
                             WHERE product.parent_id is null GROUP BY product.product_id 
                 LIMIT $start,$this->_limit";
-            }
+
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute();
@@ -127,17 +106,8 @@ class Product
     // Read data
     public function read()
     {
-        if ($this->costFrom && $this->costTo) {
-            $query = "SELECT product.product_id, `productname`, `pricesell`, `priceentry`, `count`, `description`, product.category_id, product.brand_id, `color`, `size`, `parent_id`, `product_slug`, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname, img.img AS 'img' 
-            FROM product LEFT JOIN img ON product.product_id = img.product_id 
-            LEFT JOIN category ON product.category_id = category.category_id
-            LEFT JOIN brand ON product.brand_id = brand.brand_id
-            LEFT JOIN color ON product.color = color.color_id
-            LEFT JOIN size ON product.size = size.size_id
-            WHERE parent_id is null 
-            and product.cost Between $this->costFrom and $this->costTo GROUP BY product.product_id  ORDER BY product.product_id";
-        } else {
-            $query = "SELECT product.product_id, product.productname, product.pricesell, product.priceentry, product.count, product.description, product.category_id, product.brand_id, product.color, product.size, product.parent_id, product.product_slug, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname,  GROUP_CONCAT(DISTINCT img.img) AS img, GROUP_CONCAT(DISTINCT p.color_code) as children_color, GROUP_CONCAT(DISTINCT p.sizename) AS
+
+        $query = "SELECT product.product_id, product.productname, product.pricesell, product.priceentry, product.count, product.description, product.category_id, product.brand_id, product.color, product.size, product.parent_id, product.product_slug, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname,  GROUP_CONCAT(DISTINCT img.img) AS img, GROUP_CONCAT(DISTINCT p.color_code) as children_color, GROUP_CONCAT(DISTINCT p.sizename) AS
             children_size
                         FROM product LEFT JOIN img ON product.product_id = img.product_id 
                         LEFT JOIN category ON product.category_id = category.category_id
@@ -146,23 +116,13 @@ class Product
                         LEFT JOIN size ON product.size = size.size_id
                         LEFT JOIN (SELECT product_id, parent_id, color_code, sizename FROM product, color, size WHERE product.color = color.color_id AND product.size = size.size_id ) p ON product.product_id = p.parent_id
                         WHERE product.parent_id is null GROUP BY product.product_id";
-        }
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         if ($this->_page && $this->_limit) {
             $start = $this->getStart($stmt->countRows());
-            if ($this->costFrom && $this->costTo) {
-                $query = "SELECT product.product_id, `productname`, `pricesell`, `priceentry`, `count`, `description`, product.category_id, product.brand_id, `color`, `size`, `parent_id`, `product_slug`, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname, img.img AS 'img' 
-                FROM product LEFT JOIN img ON product.product_id = img.product_id 
-                LEFT JOIN category ON product.category_id = category.category_id
-                LEFT JOIN brand ON product.brand_id = brand.brand_id
-                LEFT JOIN color ON product.color = color.color_id
-                LEFT JOIN size ON product.size = size.size_id
-                WHERE parent_id is null
-                and product.cost Between $this->costFrom and $this->costTo GROUP BY product.product_id 
-                ORDER BY product.product_id LIMIT $start,$this->_limit";
-            } else {
-                $query = "SELECT product.product_id, product.productname, product.pricesell, product.priceentry, product.count, product.description, product.category_id, product.brand_id, product.color, product.size, product.parent_id, product.product_slug, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname,  GROUP_CONCAT(DISTINCT img.img) AS img, GROUP_CONCAT(DISTINCT p.colorname) as children_color, GROUP_CONCAT(DISTINCT p.sizename) AS
+
+            $query = "SELECT product.product_id, product.productname, product.pricesell, product.priceentry, product.count, product.description, product.category_id, product.brand_id, product.color, product.size, product.parent_id, product.product_slug, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname,  GROUP_CONCAT(DISTINCT img.img) AS img, GROUP_CONCAT(DISTINCT p.colorname) as children_color, GROUP_CONCAT(DISTINCT p.sizename) AS
                 children_size
                             FROM product LEFT JOIN img ON product.product_id = img.product_id 
                             LEFT JOIN category ON product.category_id = category.category_id
@@ -172,7 +132,7 @@ class Product
                             LEFT JOIN (SELECT product_id, parent_id, colorname, sizename FROM product, color, size WHERE product.color = color.color_id AND product.size = size.size_id ) p ON product.product_id = p.parent_id
                             WHERE product.parent_id is null GROUP BY product.product_id 
                 LIMIT $start,$this->_limit";
-            }
+
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute();
@@ -183,12 +143,8 @@ class Product
     // Read data
     public function readBySlug()
     {
-        if ($this->costFrom && $this->costTo) {
-            $query = "SELECT * FROM product,category WHERE product.category_id = category.category_id 
-             AND product.pricesell Between $this->costFrom and $this->costTo
-             AND category.TenVanTat = :slug";
-        } else {
-            $query = "SELECT product.product_id, product.productname, product.pricesell, product.priceentry, product.count, product.description, product.category_id, product.brand_id, product.color, product.size, product.parent_id, product.product_slug, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname,  GROUP_CONCAT(DISTINCT img.img) AS img, GROUP_CONCAT(DISTINCT p.colorname) as children_color, GROUP_CONCAT(DISTINCT p.sizename) AS
+
+        $query = "SELECT product.product_id, product.productname, product.pricesell, product.priceentry, product.count, product.description, product.category_id, product.brand_id, product.color, product.size, product.parent_id, product.product_slug, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname,  GROUP_CONCAT(DISTINCT img.img) AS img, GROUP_CONCAT(DISTINCT p.colorname) as children_color, GROUP_CONCAT(DISTINCT p.sizename) AS
             children_size
             FROM product LEFT JOIN img ON product.product_id = img.product_id 
             LEFT JOIN category ON product.category_id = category.category_id
@@ -197,7 +153,7 @@ class Product
             LEFT JOIN size ON product.size = size.size_id
             LEFT JOIN (SELECT product_id, parent_id, colorname, sizename FROM product, color, size WHERE product.color = color.color_id AND product.size = size.size_id ) p ON product.product_id = p.parent_id
             WHERE product.parent_id is null AND (category.category_slug = :slug OR brand.brand_slug = :slug) GROUP BY product.product_id";
-        }
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':slug', $this->product_slug);
         $stmt->execute();
@@ -270,24 +226,6 @@ class Product
         $stmt->execute();
 
         return $stmt;
-        //comment
-
-        // $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // $this->product_id = $row['product_id'];
-        // $this->productname = $row['productname'];
-        // $this->category_id = $row['category_id'];
-        // $this->brand_id = $row['brand_id'];
-        // $this->TenNXB = $row['TenNXB'];
-        // $this->pricesell = $row['pricesell'];
-        // $this->SoLuong = $row['SoLuong'];
-        // $this->Anh = $row['Anh'];
-        // $this->description = $row['description'];
-        // $this->parent_id = $row['parent_id'];
-        // $this->product_slug = $row['product_slug'];
-        // $this->TenNCC = $row['TenNCC'];
-        // $this->TenVanTat = $row['TenVanTat'];
-        // $this->TenChuDe = $row['TenChuDe'];
     }
 
     // create data
@@ -344,6 +282,9 @@ class Product
 
         if ($this->img) {
             $DIR = '../../Images/product/';
+            if (!is_dir($DIR)) {
+                mkdir($DIR, 0777, true);
+            }
             foreach ($this->img as $img) {
                 $file_chunks = explode(";base64,", $img->file);
                 $base64Img = base64_decode($file_chunks[1]);
@@ -428,10 +369,13 @@ class Product
 
         if ($this->img) {
             $DIR = '../../Images/product/';
+            if (!is_dir($DIR)) {
+                mkdir($DIR, 0777, true);
+            }
             foreach ($this->img as $img) {
                 $file_chunks = explode(";base64,", $img->file);
                 $base64Img = base64_decode($file_chunks[1]);
-
+              
                 $path = 'http://' . $_SERVER['HTTP_HOST'] . '/coosport-server/Images/product/' . $img->name;
                 $file = $DIR . $img->name;
                 if (file_put_contents($file, $base64Img)) {

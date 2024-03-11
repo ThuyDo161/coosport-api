@@ -22,12 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $slide->path = htmlspecialchars(strip_tags($data->path));
     $slide->color = htmlspecialchars(strip_tags($data->color));
     $slide->img = htmlspecialchars(strip_tags($data->img));;
-    $slide->fileUpload = $data->fileUpload;
+    $slide->fileUpload = isset($_GET['fileUpload']) ? $_GET['fileUpload'] : null;
 
     if ($slide->update()) {
         echo json_encode(array(
             "code" => 200,
-            "message" 
+            "message"
             => "Cập nhật slide thành công!!",
         ));
     } else {

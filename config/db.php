@@ -2,10 +2,10 @@
 // connect database by PDO
 class db
 {
-  private $servername = "localhost";
+  private $servername = "localhost:3307";
   private $username = "root";
   private $password = "";
-  private $dbname = "coosport";
+  private $dbname = "hoangtrungshop";
   private $conn;
 
   public function connect()
@@ -13,6 +13,7 @@ class db
     $this->conn = null;
     try {
       $this->conn = new PDO("mysql:host=" . $this->servername . ";dbname=" . $this->dbname . "", $this->username, $this->password);
+      $this->conn->query("SET NAMES 'utf8'");
       // set the PDO error mode to exception
       $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
       //   echo "Connected successfully";
