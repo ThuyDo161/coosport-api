@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $banners->title = htmlspecialchars(strip_tags($data->title));
     $banners->img = htmlspecialchars(strip_tags($data->img));
     $banners->is_active = htmlspecialchars(strip_tags($data->is_active));
-    $banners->fileUpload = isset($_GET['fileUpload']) ? $_GET['fileUpload'] : null;
+    $banners->fileUpload = $data->fileUpload ? $data->fileUpload: null;
 
     if ($banners->update()) {
         echo json_encode(array(
