@@ -46,7 +46,7 @@ class HeroSlide
             $file_chunks = explode(";base64,", $img->file);
             $base64Img = base64_decode($file_chunks[1]);
 
-            $path = 'http://' . $_SERVER['HTTP_HOST'] . '/php/coosport-api/Images/slider/' . $img->name;
+            $path = 'http://' . $_SERVER['HTTP_HOST'] . '/coosport-server/Images/slider/' . $img->name;
             $file = $DIR . $img->name;
             if (file_put_contents($file, $base64Img)) {
                 $stmt->bindParam(':img', $path);
@@ -87,7 +87,7 @@ class HeroSlide
             $file_chunks = explode(";base64,", $img->file);
             $base64Img = base64_decode($file_chunks[1]);
 
-            $path = 'http://' . $_SERVER['HTTP_HOST'] . '/php/coosport-api/Images/slider/' . $img->name;
+            $path = 'http://' . $_SERVER['HTTP_HOST'] . '/coosport-server/Images/slider/' . $img->name;
             $file = $DIR . $img->name;
             if (file_put_contents($file, $base64Img)) {
                 $stmt->bindParam(':img', $path);
