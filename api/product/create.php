@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $product->description = htmlspecialchars(strip_tags($data->description));
     $product->parent_id = htmlspecialchars(strip_tags($data->parent_id));
     $product->product_slug = htmlspecialchars(strip_tags($data->product_slug));
+    $product->count = htmlspecialchars(strip_tags($data->count));
     $product->img = $data->img;
 
     if($product->create()) {

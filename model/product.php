@@ -107,15 +107,60 @@ class Product
     public function read()
     {
 
-        $query = "SELECT product.product_id, product.productname, product.pricesell, product.priceentry, product.count, product.description, product.category_id, product.brand_id, product.color, product.size, product.parent_id, product.product_slug, product.createddate, product.modifieddate, product.createdby, product.modifiedby,category.categoryname, color.colorname, size.sizename, brand.brandname,  GROUP_CONCAT(DISTINCT img.img) AS img, GROUP_CONCAT(DISTINCT p.color_code) as children_color, GROUP_CONCAT(DISTINCT p.sizename) AS
-            children_size
-                        FROM product LEFT JOIN img ON product.product_id = img.product_id 
-                        LEFT JOIN category ON product.category_id = category.category_id
-                        LEFT JOIN brand ON product.brand_id = brand.brand_id
-                        LEFT JOIN color ON product.color = color.color_id
-                        LEFT JOIN size ON product.size = size.size_id
-                        LEFT JOIN (SELECT product_id, parent_id, color_code, sizename FROM product, color, size WHERE product.color = color.color_id AND product.size = size.size_id ) p ON product.product_id = p.parent_id
-                        WHERE product.parent_id is null GROUP BY product.product_id";
+        $query = "SELECT
+        product.product_id,
+        product.productname,
+        product.pricesell,
+        product.priceentry,
+        product.count,
+        COALESCE(product.count + IFNULL(subquery.total_count, 0), product.count) AS total_count,
+        product.description,
+        product.category_id,
+        product.brand_id,
+        product.color,
+        product.size,
+        product.parent_id,
+        product.product_slug,
+        product.createddate,
+        product.modifieddate,
+        product.createdby,
+        product.modifiedby,
+        category.categoryname,
+        color.colorname,
+        size.sizename,
+        brand.brandname,
+        GROUP_CONCAT(DISTINCT img.img) AS img,
+        GROUP_CONCAT(DISTINCT child.color) AS children_color,
+        GROUP_CONCAT(DISTINCT child.size) AS children_size
+      FROM
+        product
+        LEFT JOIN img ON product.product_id = img.product_id
+        LEFT JOIN category ON product.category_id = category.category_id
+        LEFT JOIN brand ON product.brand_id = brand.brand_id
+        LEFT JOIN color ON product.color = color.color_id
+        LEFT JOIN size ON product.size = size.size_id
+        LEFT JOIN (
+          SELECT
+            parent_id,
+            SUM(count) AS total_count,
+            color_code,
+            sizename
+          FROM
+            product,
+            color, 
+            size
+          WHERE
+            product.color = color.color_id AND 
+            product.size = size.size_id AND
+            parent_id IS NOT NULL
+          GROUP BY
+            parent_id
+        ) subquery ON product.product_id = subquery.parent_id
+        LEFT JOIN product AS child ON product.product_id = child.parent_id
+      WHERE
+        product.parent_id IS NULL
+      GROUP BY
+        product.product_id";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
@@ -246,21 +291,9 @@ class Product
             }
         } while ($num > 0);
         $query = "INSERT INTO product SET productname=:productname, pricesell=:pricesell, priceentry=:priceentry,
-         count = 0 , description=:description, category_id=:category_id, brand_id=:brand_id, color=:color, size=:size,
-         parent_id=:parent_id, product_slug=:product_slug, createddate = current_timestamp(), modifieddate = current_timestamp()";
+         description=:description, category_id=:category_id, brand_id=:brand_id, color=:color, size=:size,
+         parent_id=:parent_id, product_slug=:product_slug, count=:count, createddate = current_timestamp(), modifieddate = current_timestamp()";
         $stmt = $this->conn->prepare($query);
-
-        // clean data
-        $this->productname = htmlspecialchars(strip_tags($this->productname));
-        $this->category_id = htmlspecialchars(strip_tags($this->category_id));
-        $this->brand_id = htmlspecialchars(strip_tags($this->brand_id));
-        $this->pricesell = htmlspecialchars(strip_tags($this->pricesell));
-        $this->priceentry = htmlspecialchars(strip_tags($this->priceentry));
-        $this->color = htmlspecialchars(strip_tags($this->color));
-        $this->size = htmlspecialchars(strip_tags($this->size));
-        $this->description = htmlspecialchars(strip_tags($this->description));
-        $this->parent_id = htmlspecialchars(strip_tags($this->parent_id));
-        $this->product_slug = htmlspecialchars(strip_tags($this->product_slug));
 
         if ($this->productname == "" || $this->pricesell == "" || $this->priceentry == "") {
             return false;
@@ -279,6 +312,7 @@ class Product
         $stmt->bindParam(':description', $this->description);
         $stmt->bindParam(':parent_id', $this->parent_id);
         $stmt->bindParam(':product_slug', $this->product_slug);
+        $stmt->bindParam(':count', $this->count);
 
         if ($this->img) {
             $DIR = '../../Images/product/';
@@ -332,21 +366,9 @@ class Product
         } while ($num > 0);
         $query = "UPDATE product SET productname=:productname, pricesell=:pricesell, priceentry=:priceentry,
          description=:description, category_id=:category_id, brand_id=:brand_id, color=:color, size=:size,
-         parent_id=:parent_id, product_slug=:product_slug, modifieddate = current_timestamp()
+         parent_id=:parent_id, product_slug=:product_slug, count=:count, modifieddate = current_timestamp()
             WHERE product_id = :product_id";
         $stmt = $this->conn->prepare($query);
-
-        // clean data
-        $this->productname = htmlspecialchars(strip_tags($this->productname));
-        $this->category_id = htmlspecialchars(strip_tags($this->category_id));
-        $this->brand_id = htmlspecialchars(strip_tags($this->brand_id));
-        $this->pricesell = htmlspecialchars(strip_tags($this->pricesell));
-        $this->priceentry = htmlspecialchars(strip_tags($this->priceentry));
-        $this->color = htmlspecialchars(strip_tags($this->color));
-        $this->size = htmlspecialchars(strip_tags($this->size));
-        $this->description = htmlspecialchars(strip_tags($this->description));
-        $this->parent_id = htmlspecialchars(strip_tags($this->parent_id));
-        $this->product_slug = htmlspecialchars(strip_tags($this->product_slug));
 
         if ($this->product_id == "" || $this->pricesell == "" || $this->productname == "") {
             return false;
@@ -366,6 +388,7 @@ class Product
         $stmt->bindParam(':description', $this->description);
         $stmt->bindParam(':parent_id', $this->parent_id);
         $stmt->bindParam(':product_slug', $this->product_slug);
+        $stmt->bindParam(':count', $this->count);
 
         if ($this->img) {
             $DIR = '../../Images/product/';
@@ -375,7 +398,7 @@ class Product
             foreach ($this->img as $img) {
                 $file_chunks = explode(";base64,", $img->file);
                 $base64Img = base64_decode($file_chunks[1]);
-              
+
                 $path = 'http://' . $_SERVER['HTTP_HOST'] . '/coosport-server/Images/product/' . $img->name;
                 $file = $DIR . $img->name;
                 if (file_put_contents($file, $base64Img)) {
