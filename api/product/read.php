@@ -50,6 +50,7 @@ while ($row = $read->fetch(PDO::FETCH_ASSOC)) {
         'img' => explode(',', $img),
         'parent_id' => $parent_id,
         'product_slug' => $product_slug,
+        'total_count' => $total_count,
     );
     array_push($product_arr['product'], $product_item);
 }
