@@ -38,7 +38,7 @@ while ($row = $read->fetch(PDO::FETCH_ASSOC)) {
         'color' => $color,
         'sizename' => $sizename,
         'size' => $size,
-        'img' => explode(',', $img),
+        'img' => array_filter(explode(',', $img)),
         'parent_id' => $parent_id,
         'product_slug' => $product_slug,
     );
