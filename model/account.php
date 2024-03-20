@@ -16,6 +16,10 @@ class Account
 
     // role properties
     public $rolename;
+    const ROLE_QL = 1;
+    const ROLE_NV = 2;
+    const ROLE_G = 3;
+    const ROLE_KH = 4;
 
     public function __construct($db)
     {
@@ -27,11 +31,11 @@ class Account
         $pass = md5($this->password);
         $query = "SELECT * FROM users,role,account 
         WHERE users.role_id = role.role_id AND account.user_id = users.users_id
-        AND account.password = :password AND account.username = :username AND users.status = 1";
+        AND account.password = :password AND account.username = :username AND users.status = 1 AND (role.role_id = " . Account::ROLE_G . " OR role.role_id = " . Account::ROLE_KH . ")";
 
         if ($flgAdm) $query = "SELECT * FROM users,role,account 
         WHERE users.role_id = role.role_id AND account.user_id = users.users_id
-        AND account.password = :password AND account.username = :username AND users.status = 1 AND (role.role_id = 1 OR role.role_id = 2)";
+        AND account.password = :password AND account.username = :username AND users.status = 1 AND (role.role_id = " . Account::ROLE_QL . " OR role.role_id = " . Account::ROLE_NV . ")";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':username', $this->username);
         $stmt->bindParam(':password', $pass);
